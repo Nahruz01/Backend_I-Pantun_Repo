@@ -1,0 +1,11 @@
+# 1. python -m venv back_env
+
+# python -m venv back_env
+# back_env\Scripts\activate   # Windows
+
+
+
+5.11.2025 BREAK 1 
+DONE BIT OF DATABASE
+
+DO RATING AFTER THIS
