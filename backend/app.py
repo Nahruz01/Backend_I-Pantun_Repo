@@ -20,8 +20,6 @@ from src.pyphen_backend import count_syllables
 from src.rater_backend import calculate_rating
 #
 
-
-
 app = Flask(__name__)
 CORS(app)
 
@@ -107,11 +105,22 @@ def add_pantun_route():
     # Count syllables
     syllable_counts = [count_syllables(line) for line in pantun_lines]
 
-    # Simple moral detection placeholder
+    # Simple moral detection improved
+    joined = " ".join(pantun_lines).lower()
+    cleaned = re.sub(r"[^\w\s]", "", joined)  # remove punctuation
+
+    keywords = ["nasihat", "baik", "jangan", "hormat", "bijak"]
+
     moral_detected = int(any(
-        keyword in " ".join(pantun_lines).lower()
-        for keyword in ["nasihat", "baik", "jangan", "hormat", "bijak"]
+        re.search(rf"\b{keyword}\b", cleaned)
+        for keyword in keywords
     ))
+
+    print("DEBUG: moral detection keywords:", keywords)
+    print("DEBUG: cleaned string:", cleaned)
+    print("DEBUG: detected moral:", moral_detected)
+
+    
 
     # Calculate rating and auto_score
     rating, auto_score = calculate_rating(syllable_counts, rhyme_result, moral_detected)
@@ -150,6 +159,27 @@ def add_pantun_route():
         "rating": rating,
         "auto_score": auto_score,
         "all_lines_filled": all_filled
+    })
+
+@app.route("/pantun/<int:pantun_id>/rating", methods=["GET"])
+def get_pantun_rating(pantun_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT rating, auto_score FROM pantun_rating WHERE pantun_id = ?
+        ORDER BY rating_id DESC LIMIT 1
+    """, (pantun_id,))
+
+    result = cursor.fetchone()
+    conn.close()
+
+    if not result:
+        return jsonify({"rating": 0, "auto_score": 0})
+
+    return jsonify({
+        "rating": result[0],
+        "auto_score": result[1]
     })
 
 
