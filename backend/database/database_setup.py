@@ -13,7 +13,8 @@ def create_tables():
     c.execute("""
     CREATE TABLE IF NOT EXISTS users (
         user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL      
     )
     """)
 
@@ -78,9 +79,66 @@ def create_tables():
     """)
 
 
+    # PANTUN POST TABLE
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS posts (
+        post_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        pantun_id INTEGER NOT NULL,
 
+        caption TEXT,
+        visibility TEXT DEFAULT 'private',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+        FOREIGN KEY (user_id) REFERENCES users(user_id),
+        FOREIGN KEY (pantun_id) REFERENCES pantun(pantun_id)
+    )
+    """)
+
+    # COMMENT TABLE
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS comments (
+        comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(post_id, user_id),
+        FOREIGN KEY (post_id) REFERENCES posts(post_id),
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    """)
+
+    # LIKE TABLE
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS likes (
+        user_id INTEGER NOT NULL,  
+        post_id INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (post_id) REFERENCES posts(post_id),
+        FOREIGN KEY (user_id) REFERENCES users(user_id),
+        UNIQUE(post_id, user_id)  -- prevent duplicate likes
+    )
+    """)
+
+    # FAV TABLE
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS favorites (
+        user_id INTEGER NOT NULL,
+        post_id INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (user_id, post_id),
+        FOREIGN KEY (user_id) REFERENCES users(user_id),
+        FOREIGN KEY (post_id) REFERENCES posts(post_id)
+    )
+    """)
+
+
+
+    # No longer needed once account management setup
     # INSERT DEFAULT GUEST USER
-    c.execute("INSERT OR IGNORE INTO users (user_id, username) VALUES (0, 'GUEST')")
+    #c.execute("INSERT OR IGNORE INTO users (user_id, username) VALUES (0, 'GUEST')")
 
     conn.commit()
     conn.close()
