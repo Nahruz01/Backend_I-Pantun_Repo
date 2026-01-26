@@ -11,12 +11,10 @@ def syllabify_line(line):
     return ['-'.join(syllabify_word(word)) for word in words]
 
 pantun = [
-    "Dua tiga kucing berlari,",
-    "Mana nak sama si kucing belang",
-    "Dua tiga boleh kucari",
-    "Mana nak sama kawanku seorang\n",
-    "ababa bbbb babab bbabba bbaabbaa,",
-    "Pantai pisau amboi kuih"
+    "Kelana bawah langit biru",
+    "Kelana jauh dipanggil indung",
+    "Rindu aku angin bayu",
+    "Dari hulu ke puncak gunung",
 ]
 
 for line in pantun:

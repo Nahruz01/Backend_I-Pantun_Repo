@@ -1,3 +1,5 @@
+#repetitor.py
+
 import re
 
 pantun = [
@@ -23,10 +25,14 @@ pantun2AAAA = [
 
 
 # Basic Malay syllable splitter using vowel-based heuristic
-def get_last_syllable(word):
-    # Simple Malay syllable approximation: split before vowels
-    syllables = re.findall(r'[^aeiou]*[aeiou]+(?:ng|[bcdfghjklmnpqrstvwxyz]*)?', word.lower())
-    return syllables[-1] if syllables else word.lower()
+def get_last_syllable(word, length=3): ####DUM DUM DUM WHY USE LENGTH 3
+    """
+    Return last `length` letters of the word as the "syllable".
+    Better approximation for Malay rhymes like 'ari'/'ang'.
+    """
+    word = re.sub(r'[^\w]', '', word.lower())
+    return word[-length:] if len(word) >= length else word
+
 
 # Function to extract and clean last word from a line
 def get_last_word(line):

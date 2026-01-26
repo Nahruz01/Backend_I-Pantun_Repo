@@ -76,25 +76,40 @@ def add_pantun_to_db(data):
     conn = get_connection()
     c = conn.cursor()
 
-    # Ensure lines are split individually
-    line1 = data.get("line1", "")
-    line2 = data.get("line2", "")
-    line3 = data.get("line3", "")
-    line4 = data.get("line4", "")
+    lines = data.get("lines", [])
+    if len(lines) != 4:
+        raise ValueError("Pantun must contain exactly 4 lines")
 
+    # Insert pantun
     c.execute("""
         INSERT INTO pantun (title, user_id, tags, line1, line2, line3, line4)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         data.get("title", ""),
-        data.get("user_id", 0),  # <-- changed from username
+        data.get("user_id"),
         data.get("tags", ""),
-        line1, line2, line3, line4
+        lines[0],
+        lines[1],
+        lines[2],
+        lines[3]
     ))
 
     pantun_id = c.lastrowid
+
+    # Insert post metadata
+    c.execute("""
+        INSERT INTO posts (user_id, pantun_id, caption, visibility)
+        VALUES (?, ?, ?, ?)
+    """, (
+        data["user_id"],
+        pantun_id,
+        data.get("caption", ""),
+        data.get("visibility", "public")
+    ))
+
     conn.commit()
     conn.close()
+
     return pantun_id
 
 
